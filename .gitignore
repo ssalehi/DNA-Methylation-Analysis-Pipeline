@@ -5,3 +5,4 @@
 *.idat
 Input_Data/
 *.RDataTmp*
+*.RData
