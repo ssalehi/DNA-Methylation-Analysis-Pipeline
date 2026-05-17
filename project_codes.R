@@ -17,6 +17,11 @@
 
 ## ⚙️ Step 0 – Initialization (Environment Setup)
 
+# Create Results directory if it doesn't exist
+if (!dir.exists("Results")) {
+  dir.create("Results")
+}
+
 # Clear the environment
 rm(list = ls())
 
@@ -313,6 +318,7 @@ short_labels_raw <- substr(colnames(beta_raw), 1, 8)
 short_labels_norm <- substr(colnames(beta_norm), 1, 8)
 
 # 6 plots layout
+png("Results/Density_6Panels.png", width = 1200, height = 800, res = 120)
 par(mfrow = c(2, 3))
 
 # 1. Mean of RAW
@@ -346,6 +352,8 @@ legend("topright", legend = c("Type I", "Type II"), col = c("black", "blue"), lt
 # 6. Boxplot of NORM
 boxplot(beta_norm, main = "Normalized Beta values", col = c("red", "green", "blue"),
         names = short_labels_norm)
+
+dev.off()
 
 #--------------------------------------- Step 7--ptional
 
@@ -386,6 +394,7 @@ pca_result <- prcomp(beta_t, center = TRUE, scale. = TRUE)
 group_colors <- ifelse(meta$Group == "CTRL", "darkgreen", "firebrick")
 
 # Plot PCA by group
+png("Results/PCA_Group.png", width = 800, height = 600, res = 120)
 plot(pca_result$x[,1:2],
      col = group_colors,
      pch = 19,
@@ -395,10 +404,13 @@ grid(col = "gray85", lty = "dotted")
 legend("topright", legend = c("CTRL", "DIS"),
        col = c("darkgreen", "firebrick"), pch = 19)
 
+dev.off()
+
 # Color coding based on gender
 sex_colors <- ifelse(meta$Sex == "Male", "navy", "orange")
 
 # Plot PCA based on gender
+png("Results/PCA_Sex.png", width = 800, height = 600, res = 120)
 plot(pca_result$x[,1:2],
      col = sex_colors,
      pch = 19,
@@ -408,7 +420,10 @@ grid(col = "gray85", lty = "dotted")
 legend("topright", legend = c("Male", "Female"),
        col = c("navy", "orange"), pch = 19)
 
+dev.off() 
+
 # Define colors based on Batch (Sentrix_ID)
+png("Results/PCA_Batch.png", width = 800, height = 600, res = 120)
 batch_colors <- as.factor(meta$Sentrix_ID)
 
 plot(pca_result$x[,1:2],
@@ -419,6 +434,7 @@ plot(pca_result$x[,1:2],
 grid(col = "gray85", lty = "dotted")
 legend("topright", legend = levels(batch_colors),
        col = 1:length(levels(batch_colors)), pch = 19)
+dev.off()
 
 #--------------------------------------- Step 9
 
@@ -545,6 +561,7 @@ toManhattan_annotated <- merge(toManhattan, manifest_clean[, c("Name", "CHR", "M
 toManhattan_annotated <- na.omit(toManhattan_annotated)
 
 # Drawing Manhattan Plot
+png("Results/Manhattan_Plot.png", width = 1000, height = 600, res = 120)
 plot(toManhattan_annotated$MAPINFO, -log10(toManhattan_annotated$pval),
      pch = 16, cex = 0.5, col = "darkblue",
      xlab = "Genomic Position", ylab = "-log10(p-value)",
@@ -552,6 +569,7 @@ plot(toManhattan_annotated$MAPINFO, -log10(toManhattan_annotated$pval),
      ylim = c(0, 5))
 
 abline(h = -log10(0.01), col = "red", lty = 2, lwd = 2)
+dev.off() 
 
 #--------------------------------------- Step 12
 
@@ -585,3 +603,40 @@ heatmap.2(input_heatmap,
           main = "Heatmap of Top 100 Differentially Methylated Probes")
 
 
+
+
+
+# Export Differential Methylation Results
+write.csv(final_wilcox_first50k_corrected, 
+          file = "Results/Differential_Methylation_Results_Top50k.csv", 
+          row.names = TRUE)
+
+
+# Export Volcano Plot
+png("Results/Volcano_Plot.png", width = 800, height = 600, res = 120)
+
+plot(toVolcano$delta_beta, toVolcano$negLog10_p, pch=16, cex=0.5, 
+     xlab="Δβ (DIS - CTRL)", ylab="-log10(p-value)", main="Volcano Plot")
+abline(h = -log10(0.01), col = "red", lty = 2)
+points(toHighlight$delta_beta, toHighlight$negLog10_p, pch=16, cex=0.7, col="orange")
+
+dev.off()
+
+
+
+# Export Heatmap
+png("Results/Heatmap_Top100.png", width = 800, height = 800, res = 120)
+
+heatmap.2(input_heatmap,
+          col = terrain.colors(100),
+          Rowv = TRUE,
+          Colv = TRUE,
+          dendrogram = "both",
+          trace = "none",
+          ColSideColors = colorbar,
+          key = TRUE,
+          scale = "none",
+          cexRow = 0.5,
+          main = "Heatmap of Top 100 Differentially Methylated Probes")
+
+dev.off()
