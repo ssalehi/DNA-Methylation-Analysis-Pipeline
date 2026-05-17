@@ -40,4 +40,13 @@ The pipeline is structured into standard epigenetic data processing steps:
 ## 💡 Results
 The pipeline successfully normalized the probe chemistries and identified distinct methylation signatures separating the CTRL and DIS groups, visualized perfectly in the final hierarchical clustering heatmap. For full graphical outputs and biological interpretation, please refer to the attached PDF report.
 
+
+## 📥 Reproducibility & How to Run
+Due to repository size limitations, the raw `.idat` files and temporary `.RData` environments are not included here. 
+
+To completely reproduce this pipeline on your local machine:
+1. Create a folder named `Input_Data/` in the root directory.
+2. Download the required raw Illumina 450K `.idat` files (GEO accessions starting with GSM5319592, etc.) and place them inside the `Input_Data/` folder along with the metadata file.
+3. Open `project_codes.R` and run it. The code is already configured to automatically read from `./Input_Data/` and process the files seamlessly.
+
 --------------------------------------------------------------------------------
